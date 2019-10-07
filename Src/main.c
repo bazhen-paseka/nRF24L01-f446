@@ -63,16 +63,11 @@ void SystemClock_Config(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
-#define MY_CHANNEL 106
-
-/* My address */
-uint8_t MyAddress[] = { 0x65, 0x65, 0x65, 0x65, 0x65 };
-/* Other end address */
-uint8_t TxAddress[] = { 0x56, 0x56, 0x56, 0x56, 0x56 };
-/* Data received and data for send */
-uint8_t dataOut[32], dataIn[32];
-/* NRF transmission status */
-NRF24L01_Transmit_Status_t transmissionStatus;
+	#define MY_CHANNEL 106
+	uint8_t MyAddress[] = { 0x65, 0x65, 0x65, 0x65, 0x65 };		/* My address */
+	uint8_t TxAddress[] = { 0x56, 0x56, 0x56, 0x56, 0x56 };		/* Other end address */
+	uint8_t dataOut[32], dataIn[32];							/* Data received and data for send */
+	NRF24L01_Transmit_Status_t transmissionStatus;				/* NRF transmission status */
 
 /* USER CODE END 0 */
 
@@ -107,27 +102,24 @@ int main(void)
   MX_GPIO_Init();
   MX_SPI3_Init();
   /* USER CODE BEGIN 2 */
-	LCD_Init();
 
+	LCD_Init();
 	LCD_FillScreen(ILI92_WHITE);
 	LCD_SetTextColor(ILI92_MAGENTA, ILI92_WHITE);
 	LCD_SetRotation(1);
-	LCD_Printf("Sending data: \n");
 
-	NRF24L01_Init(&hspi3, MY_CHANNEL, 32);
-	/* Set 250kBps data rate and -6dBm output power */
+	NRF24L01_Init(&hspi3, MY_CHANNEL, 32);			/* Set 250kBps data rate and -6dBm output power */
 	NRF24L01_SetRF(NRF24L01_DataRate_250k, NRF24L01_OutputPower_M6dBm);
-	/* Set my address, 5 bytes */
-	NRF24L01_SetMyAddress(MyAddress);
-	/* Set TX address, 5 bytes */
-	NRF24L01_SetTxAddress(TxAddress);
+	NRF24L01_SetMyAddress(MyAddress);	/* Set my address, 5 bytes */
+	NRF24L01_SetTxAddress(TxAddress);	/* Set TX address, 5 bytes */
+
 	/* Time variables & received errors counter */
 	uint32_t sendTime = HAL_GetTick();
 	uint8_t errors = 0;
 	uint32_t lastTime = HAL_GetTick();
 	int16_t i = 0;
-	LCD_Printf("START ");
 
+	LCD_Printf("START ");
 
   /* USER CODE END 2 */
 
@@ -135,57 +127,54 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-
 	  /* Every 2 seconds */
-	  		if (HAL_GetTick() - lastTime > 2000) {
-	  			/* Fill data with something */
-	  			LCD_SetCursor(0, 0);
-	  			LCD_FillScreen(ILI92_WHITE);
-	  			sprintf((char *) dataOut, "Good news everyone! #%d", i++);
-	  			LCD_Printf("Sending data: \n");
-	  			LCD_Printf("%s\n", dataOut);
-	  			/* Transmit data, goes automatically to TX mode */
-	  			NRF24L01_Transmit(dataOut);
-	  			/* Wait for data to be sent */
-	  			do { /* Get transmission status */
-	  				transmissionStatus = NRF24L01_GetTransmissionStatus();
-	  			} while (transmissionStatus == NRF24L01_Transmit_Status_Sending);
-	  			sendTime = HAL_GetTick();
+	if (HAL_GetTick() - lastTime > 2000) {
+		LCD_SetCursor(0, 0);
+		LCD_FillScreen(ILI92_WHITE);
 
-	  			/* Go back to RX mode */
-	  			NRF24L01_PowerUpRx();
-	  			/* Wait received data, wait max 100ms, if time is larger, then data were probably lost */
-	  			while (!NRF24L01_DataReady() && (HAL_GetTick() - sendTime) < 100);
+		sprintf((char *) dataOut, "my nRF24L01 packet #%d", i++);			/* Fill data with something */
+		LCD_Printf("\nTX: ");
+		LCD_Printf("%s\n", dataOut);
+		/* Transmit data, goes automatically to TX mode */
+		NRF24L01_Transmit(dataOut);
+		/* Wait for data to be sent */
+		do { /* Get transmission status */
+			transmissionStatus = NRF24L01_GetTransmissionStatus();
+		} while (transmissionStatus == NRF24L01_Transmit_Status_Sending);
+		sendTime = HAL_GetTick();
 
-	  			/* Show ping time */
-	  			LCD_Printf("%d ms\n", HAL_GetTick() - sendTime);
-	  			/* Check transmit status */
-	  			LCD_Printf("Status: ");
-	  			if (transmissionStatus == NRF24L01_Transmit_Status_Ok) {
-	  				/* Transmit went OK */
-	  				LCD_Printf("OK\n");
-	  			} else if (transmissionStatus == NRF24L01_Transmit_Status_Lost) {
-	  				/* Message was LOST */
-	  				LCD_Printf("LOST\n");
-	  			} else {
-	  				/* This should never happen */
-	  				LCD_Printf("SENDING\n");
-	  			}
-	  			LCD_Printf("Receiving back: \n");
-	  			/* Get data from NRF2L01+ */
-	  			NRF24L01_GetData(dataIn);
-	  			LCD_Printf("%s\n", dataIn);
+		/* Go back to RX mode */
+		NRF24L01_PowerUpRx();
+		/* Wait received data, wait max 100ms, if time is larger, then data were probably lost */
+		while (!NRF24L01_DataReady() && (HAL_GetTick() - sendTime) < 100);
 
-	  			errors = 0;
-	  			for (int k = 0; k < sizeof(dataIn) / sizeof(dataIn[0]); k++) {
-	  				errors += (dataIn[k] != dataOut[k]);
-	  			}
-	  			LCD_Printf("Errors: %d\n", errors);
-	  			LCD_Printf("\n");
-	  			lastTime = HAL_GetTick();
-	  		}
+		/* Show ping time */
+		LCD_Printf("ping: %d ms\n", HAL_GetTick() - sendTime);
+		/* Check transmit status */
+		LCD_Printf("Status: ");
+		if (transmissionStatus == NRF24L01_Transmit_Status_Ok) {
+			/* Transmit went OK */
+			LCD_Printf("OK\n");
+		} else if (transmissionStatus == NRF24L01_Transmit_Status_Lost) {
+			/* Message was LOST */
+			LCD_Printf("LOST\n");
+		} else {
+			/* This should never happen */
+			LCD_Printf("SENDING\n");
+		}
+		LCD_Printf("RX: ");
+		/* Get data from NRF2L01+ */
+		NRF24L01_GetData(dataIn);
+		LCD_Printf("%s\n", dataIn);
 
-
+		errors = 0;
+		for (int k = 0; k < sizeof(dataIn) / sizeof(dataIn[0]); k++) {
+			errors += (dataIn[k] != dataOut[k]);
+		}
+		LCD_Printf("Errors: %d\n", errors);
+		LCD_Printf("\n");
+		lastTime = HAL_GetTick();
+	}
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
