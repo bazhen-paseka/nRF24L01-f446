@@ -29,7 +29,7 @@
 	#include <string.h>
 	#include <stdio.h>
 	#include "lcd.h"
-	#include "NRF24L01.h"
+	#include "NRF24L01_sm.h"
 
 /* USER CODE END Includes */
 

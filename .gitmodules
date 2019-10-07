@@ -1,3 +1,6 @@
 [submodule "Drivers/display_ILI-93xx_sm"]
 	path = Drivers/display_ILI-93xx_sm
 	url = https://github.com/bazhen-paseka/display_ILI-93xx_sm.git
+[submodule "Drivers/nrf24l01_sm"]
+	path = Drivers/nrf24l01_sm
+	url = https://github.com/bazhen-paseka/nrf24l01_sm.git
