@@ -109,12 +109,9 @@ int main(void)
   /* USER CODE BEGIN 2 */
 	LCD_Init();
 
-//	LCD_FillScreen(BLACK);
-//	LCD_SetTextColor(GREEN, BLACK);
-
-	LCD_FillScreen(WHITE);
-	LCD_SetTextColor(MAGENTA, WHITE);
-
+	LCD_FillScreen(ILI92_WHITE);
+	LCD_SetTextColor(ILI92_MAGENTA, ILI92_WHITE);
+	LCD_SetRotation(1);
 	LCD_Printf("Sending data: \n");
 
 	NRF24L01_Init(&hspi3, MY_CHANNEL, 32);
@@ -142,6 +139,8 @@ int main(void)
 	  /* Every 2 seconds */
 	  		if (HAL_GetTick() - lastTime > 2000) {
 	  			/* Fill data with something */
+	  			LCD_SetCursor(0, 0);
+	  			LCD_FillScreen(ILI92_WHITE);
 	  			sprintf((char *) dataOut, "Good news everyone! #%d", i++);
 	  			LCD_Printf("Sending data: \n");
 	  			LCD_Printf("%s\n", dataOut);
